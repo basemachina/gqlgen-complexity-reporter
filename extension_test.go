@@ -16,11 +16,11 @@ import (
 )
 
 type testReporter struct {
-	complexities map[string]int
+	complexity int
 }
 
-func (t *testReporter) Report(ctx context.Context, operationName string, complexity int) {
-	t.complexities[operationName] = complexity
+func (t *testReporter) Report(ctx context.Context, _ string, complexity int) {
+	t.complexity = complexity
 }
 
 func getComplexityStats(ctx context.Context) *complexitymetrics.ComplexityStats {
@@ -44,36 +44,36 @@ func TestReportComplexity(t *testing.T) {
 	})
 
 	t.Run("below complexity limit", func(t *testing.T) {
-		reporter := &testReporter{complexities: map[string]int{}}
+		reporter := &testReporter{complexity: 0}
 		h.Use(complexitymetrics.ReportComplexity(2, reporter))
 		h.SetCalculatedComplexity(2)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 
 		require.Equal(t, 2, stats.Complexity)
-		require.Equal(t, 0, reporter.complexities[""])
+		require.Equal(t, 0, reporter.complexity)
 	})
 
 	t.Run("above complexity limit", func(t *testing.T) {
-		reporter := &testReporter{complexities: map[string]int{}}
+		reporter := &testReporter{complexity: 0}
 		h.Use(complexitymetrics.ReportComplexity(2, reporter))
 		h.SetCalculatedComplexity(4)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 
 		require.Equal(t, 4, stats.Complexity)
-		require.Equal(t, 4, reporter.complexities[""])
+		require.Equal(t, 4, reporter.complexity)
 	})
 
 	t.Run("bypass __schema field", func(t *testing.T) {
-		reporter := &testReporter{complexities: map[string]int{}}
+		reporter := &testReporter{complexity: 0}
 		h.Use(complexitymetrics.ReportComplexity(2, reporter))
 		h.SetCalculatedComplexity(4)
 		resp := doRequest(h, "POST", "/graphql", `{ "operationName":"IntrospectionQuery", "query":"query IntrospectionQuery { __schema { queryType { name } mutationType { name }}}"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 
 		require.Equal(t, 0, stats.Complexity)
-		require.Equal(t, 0, reporter.complexities[""])
+		require.Equal(t, 0, reporter.complexity)
 	})
 }
 
