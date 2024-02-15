@@ -22,7 +22,7 @@ type reporter struct {
     logger *zap.Logger
 }
 
-func (r *reporter) ReportComplexity(ctx context.Context, complexity int) {
+func (r *reporter) Report(ctx context.Context, operationName string, complexity int) {
     r.logger.Info("[graphql query complexity]", zap.Int("complexity", complexity))
 }
 
