@@ -1,4 +1,4 @@
-package complexitymetrics_test
+package complexityreporter_test
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	complexitymetrics "github.com/basemachina/gqlgen-complexity-metrics"
+	complexityreporter "github.com/basemachina/gqlgen-complexity-reporter"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/graphql/handler/testserver"
@@ -28,7 +28,7 @@ func TestReportComplexity(t *testing.T) {
 
 	t.Run("below complexity limit", func(t *testing.T) {
 		reporter := &testReporter{complexity: 0}
-		h.Use(complexitymetrics.NewComplexityReporterExtension(2, reporter))
+		h.Use(complexityreporter.NewExtension(2, reporter))
 		h.SetCalculatedComplexity(2)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
@@ -38,7 +38,7 @@ func TestReportComplexity(t *testing.T) {
 
 	t.Run("above complexity limit", func(t *testing.T) {
 		reporter := &testReporter{complexity: 0}
-		h.Use(complexitymetrics.NewComplexityReporterExtension(2, reporter))
+		h.Use(complexityreporter.NewExtension(2, reporter))
 		h.SetCalculatedComplexity(4)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
@@ -48,7 +48,7 @@ func TestReportComplexity(t *testing.T) {
 
 	t.Run("bypass __schema field", func(t *testing.T) {
 		reporter := &testReporter{complexity: 0}
-		h.Use(complexitymetrics.NewComplexityReporterExtension(2, reporter))
+		h.Use(complexityreporter.NewExtension(2, reporter))
 		h.SetCalculatedComplexity(4)
 		resp := doRequest(h, "POST", "/graphql", `{ "operationName":"IntrospectionQuery", "query":"query IntrospectionQuery { __schema { queryType { name } mutationType { name }}}"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())

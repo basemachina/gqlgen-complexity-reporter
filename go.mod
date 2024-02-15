@@ -1,11 +1,10 @@
-module github.com/basemachina/gqlgen-complexity-metrics
+module github.com/basemachina/gqlgen-complexity-reporter
 
 go 1.22.0
 
 require (
 	github.com/99designs/gqlgen v0.17.43
 	github.com/stretchr/testify v1.8.4
-	github.com/vektah/gqlparser/v2 v2.5.11
 )
 
 require (
@@ -17,5 +16,6 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sosodev/duration v1.1.0 // indirect
+	github.com/vektah/gqlparser/v2 v2.5.11 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

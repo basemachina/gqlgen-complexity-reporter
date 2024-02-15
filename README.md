@@ -1,11 +1,11 @@
-# gqlgen-complexity-metrics
+# gqlgen-complexity-reporter
 
 This is a simple middleware of [gqlgen](https://gqlgen.com/) to measure the complexity of a GraphQL query.
 
 ## Installation
 
 ```bash
-go get github.com/basemachina/gqlgen-complexity-metrics
+go get github.com/basemachina/gqlgen-complexity-reporter
 ```
 
 ## Usage
@@ -15,7 +15,7 @@ package main
 
 import (
     ...
-    complexitymetrics "github.com/basemachina/gqlgen-complexity-metrics"
+    complexityreporter "github.com/basemachina/gqlgen-complexity-reporter"
 )
 
 type reporter struct {
@@ -31,7 +31,8 @@ func main() {
         ...
     }))
     logger, _ := zap.NewProduction()
-    h.Use(complexitymetrics.NewComplexityReporterExtension(100, reporter{logger: logger})) // 100 is the maximum complexity allowed
+    r := reporter{logger: logger}
+    h.Use(complexityreporter.NewExtension(r, complexityreporter.WithThreathold(100))) // 100 is the maximum complexity allowed
 
     http.Handle("/", playground.Handler("GraphQL playground", "/query"))
     http.Handle("/query", auth.AuthMiddleware(srv))

@@ -1,4 +1,4 @@
-package complexitymetrics
+package complexityreporter
 
 import (
 	"context"
@@ -22,8 +22,8 @@ type extension struct {
 // implements HandlerExtension
 var _ graphql.HandlerExtension = (*extension)(nil)
 
-// NewComplexityReporterExtension sets a logger/tracer which reports a query complexity exceeds a limit
-func NewComplexityReporterExtension(limit int, complexityReporter ComplexityReporter) *extension {
+// NewExtension sets a logger/tracer which reports a query complexity exceeds a limit
+func NewExtension(limit int, complexityReporter ComplexityReporter) *extension {
 	return &extension{
 		complexityReporter: complexityReporter,
 		limit:              limit,
