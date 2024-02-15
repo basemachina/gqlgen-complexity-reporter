@@ -3,63 +3,59 @@ package complexitymetrics
 import (
 	"context"
 
-	"github.com/vektah/gqlparser/v2/gqlerror"
-
 	"github.com/99designs/gqlgen/complexity"
 	"github.com/99designs/gqlgen/graphql"
 )
 
-// ComplexityMetrics allows you to define a metrics reporter depending on query complexity and a defined limit.
-type ComplexityMetrics struct {
-	reporter Reporter
-	limit    int
-	es       graphql.ExecutableSchema
+// ComplexityReporter is an interface for reporting a query complexity exceeds a limit
+type ComplexityReporter interface {
+	ReportComplexity(ctx context.Context, operationName string, complexity int)
 }
 
-type Reporter interface {
-	Report(ctx context.Context, operationName string, complexity int)
+// extension allows you to define a metrics reporter depending on query complexity and a defined limit.
+type extension struct {
+	complexityReporter ComplexityReporter
+	limit              int
+	es                 graphql.ExecutableSchema
 }
 
-var _ interface {
-	graphql.OperationContextMutator
-	graphql.HandlerExtension
-} = &ComplexityMetrics{}
+// implements HandlerExtension
+var _ graphql.HandlerExtension = (*extension)(nil)
 
-const ExtensionName = "ComplexityMetrics"
+const ExtensionName = "ComplexityReporter"
 
-type ComplexityStats struct {
-	// The calculated complexity for this request
-	Complexity int
-}
-
-// ReportComplexity sets a logger/tracer which reports a query complexity exceeds a limit
-func ReportComplexity(limit int, reporter Reporter) *ComplexityMetrics {
-	return &ComplexityMetrics{
-		reporter: reporter,
-		limit:    limit,
+// NewComplexityReporterExtension sets a logger/tracer which reports a query complexity exceeds a limit
+func NewComplexityReporterExtension(limit int, complexityReporter ComplexityReporter) *extension {
+	return &extension{
+		complexityReporter: complexityReporter,
+		limit:              limit,
 	}
 }
 
-func (c ComplexityMetrics) ExtensionName() string {
+func (c extension) ExtensionName() string {
 	return ExtensionName
 }
 
-func (c *ComplexityMetrics) Validate(schema graphql.ExecutableSchema) error {
+func (c *extension) Validate(schema graphql.ExecutableSchema) error {
 	c.es = schema
 	return nil
 }
 
-func (c ComplexityMetrics) MutateOperationContext(ctx context.Context, rc *graphql.OperationContext) *gqlerror.Error {
+// implements OperationInterceptor
+var _ graphql.OperationInterceptor = (*extension)(nil)
+
+func (c extension) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+	rc := graphql.GetOperationContext(ctx)
+	if rc == nil {
+		return nil
+	}
+
 	op := rc.Doc.Operations.ForName(rc.OperationName)
 	complexityCalcs := complexity.Calculate(c.es, op, rc.Variables)
 
-	rc.Stats.SetExtension(ExtensionName, &ComplexityStats{
-		Complexity: complexityCalcs,
-	})
-
 	if complexityCalcs > c.limit {
-		c.reporter.Report(ctx, rc.OperationName, complexityCalcs)
+		c.complexityReporter.ReportComplexity(ctx, rc.OperationName, complexityCalcs)
 	}
 
-	return nil
+	return next(ctx)
 }
