@@ -1,6 +1,6 @@
 # gqlgen-complexity-metrics
 
-This is a simple example of how to use [gqlgen](https://gqlgen.com/) to measure the complexity of a GraphQL query.
+This is a simple middleware of [gqlgen](https://gqlgen.com/) to measure the complexity of a GraphQL query.
 
 ## Installation
 
