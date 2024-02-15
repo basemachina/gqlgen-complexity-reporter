@@ -26,9 +26,19 @@ func TestReportComplexity(t *testing.T) {
 	h := testserver.New()
 	h.AddTransport(&transport.POST{})
 
+	t.Run("always report", func(t *testing.T) {
+		reporter := &testReporter{complexity: 0}
+		h.Use(complexityreporter.NewExtension(reporter))
+		h.SetCalculatedComplexity(2)
+		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
+		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+
+		require.Equal(t, 2, reporter.complexity)
+	})
+
 	t.Run("below complexity limit", func(t *testing.T) {
 		reporter := &testReporter{complexity: 0}
-		h.Use(complexityreporter.NewExtension(2, reporter))
+		h.Use(complexityreporter.NewExtension(reporter, complexityreporter.WithThreshold(2)))
 		h.SetCalculatedComplexity(2)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
@@ -38,7 +48,7 @@ func TestReportComplexity(t *testing.T) {
 
 	t.Run("above complexity limit", func(t *testing.T) {
 		reporter := &testReporter{complexity: 0}
-		h.Use(complexityreporter.NewExtension(2, reporter))
+		h.Use(complexityreporter.NewExtension(reporter, complexityreporter.WithThreshold(2)))
 		h.SetCalculatedComplexity(4)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
@@ -48,7 +58,7 @@ func TestReportComplexity(t *testing.T) {
 
 	t.Run("bypass __schema field", func(t *testing.T) {
 		reporter := &testReporter{complexity: 0}
-		h.Use(complexityreporter.NewExtension(2, reporter))
+		h.Use(complexityreporter.NewExtension(reporter, complexityreporter.WithThreshold(2)))
 		h.SetCalculatedComplexity(4)
 		resp := doRequest(h, "POST", "/graphql", `{ "operationName":"IntrospectionQuery", "query":"query IntrospectionQuery { __schema { queryType { name } mutationType { name }}}"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
