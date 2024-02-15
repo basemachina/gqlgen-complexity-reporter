@@ -36,7 +36,7 @@ func TestReportComplexity(t *testing.T) {
 		require.Equal(t, 2, reporter.complexity)
 	})
 
-	t.Run("below complexity limit", func(t *testing.T) {
+	t.Run("below complexity threshold", func(t *testing.T) {
 		reporter := &testReporter{complexity: 0}
 		h.Use(complexityreporter.NewExtension(reporter, complexityreporter.WithThreshold(2)))
 		h.SetCalculatedComplexity(2)
@@ -46,7 +46,7 @@ func TestReportComplexity(t *testing.T) {
 		require.Equal(t, 0, reporter.complexity)
 	})
 
-	t.Run("above complexity limit", func(t *testing.T) {
+	t.Run("above complexity threshold", func(t *testing.T) {
 		reporter := &testReporter{complexity: 0}
 		h.Use(complexityreporter.NewExtension(reporter, complexityreporter.WithThreshold(2)))
 		h.SetCalculatedComplexity(4)
