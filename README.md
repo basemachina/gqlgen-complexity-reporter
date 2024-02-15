@@ -22,7 +22,7 @@ type reporter struct {
     logger *zap.Logger
 }
 
-func (r *reporter) Report(ctx context.Context, operationName string, complexity int) {
+func (r *reporter) ReportComplexity(ctx context.Context, operationName string, complexity int) {
     r.logger.Info("[graphql query complexity]", zap.Int("complexity", complexity))
 }
 
@@ -31,7 +31,7 @@ func main() {
         ...
     }))
     logger, _ := zap.NewProduction()
-    h.Use(complexitymetrics.ReportComplexity(100, reporter{logger: logger})) // 100 is the maximum complexity allowed
+    h.Use(complexitymetrics.NewComplexityReporterExtension(100, reporter{logger: logger})) // 100 is the maximum complexity allowed
 
     http.Handle("/", playground.Handler("GraphQL playground", "/query"))
     http.Handle("/query", auth.AuthMiddleware(srv))
