@@ -22,8 +22,6 @@ type extension struct {
 // implements HandlerExtension
 var _ graphql.HandlerExtension = (*extension)(nil)
 
-const ExtensionName = "ComplexityReporter"
-
 // NewComplexityReporterExtension sets a logger/tracer which reports a query complexity exceeds a limit
 func NewComplexityReporterExtension(limit int, complexityReporter ComplexityReporter) *extension {
 	return &extension{
@@ -33,7 +31,7 @@ func NewComplexityReporterExtension(limit int, complexityReporter ComplexityRepo
 }
 
 func (c extension) ExtensionName() string {
-	return ExtensionName
+	return "ComplexityReporter"
 }
 
 func (c *extension) Validate(schema graphql.ExecutableSchema) error {
