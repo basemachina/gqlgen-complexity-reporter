@@ -14,8 +14,8 @@ go get github.com/basemachina/gqlgen-complexity-metrics
 package main
 
 import (
-	...
-	complexitymetrics "github.com/basemachina/gqlgen-complexity-metrics"
+    ...
+    complexitymetrics "github.com/basemachina/gqlgen-complexity-metrics"
 )
 
 type reporter struct {
@@ -28,14 +28,14 @@ func (r *reporter) ReportComplexity(ctx context.Context, complexity int) {
 
 func main() {
     srv := handler.NewDefaultServer(internal.NewExecutableSchema(internal.Config{
-		...
-	}))
+        ...
+    }))
     logger, _ := zap.NewProduction()
-	h.Use(complexitymetrics.ReportComplexity(2, reporter{logger: logger}))
+    h.Use(complexitymetrics.ReportComplexity(2, reporter{logger: logger}))
 
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", auth.AuthMiddleware(srv))
+    http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+    http.Handle("/query", auth.AuthMiddleware(srv))
 
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+    log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 ```
