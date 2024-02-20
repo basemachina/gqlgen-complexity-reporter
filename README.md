@@ -31,8 +31,8 @@ func main() {
         ...
     }))
     logger, _ := zap.NewProduction()
-    r := reporter{logger: logger}
-    h.Use(complexityreporter.NewExtension(r, complexityreporter.WithThreshold(100))) // 100 is the maximum complexity allowed
+    r := &reporter{logger: logger}
+    srv.Use(complexityreporter.NewExtension(r, complexityreporter.WithThreshold(100))) // 100 is the maximum complexity allowed
 
     http.Handle("/", playground.Handler("GraphQL playground", "/query"))
     http.Handle("/query", auth.AuthMiddleware(srv))
