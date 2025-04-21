@@ -1,6 +1,6 @@
 module github.com/basemachina/gqlgen-complexity-reporter
 
-go 1.21.0
+go 1.24.0
 
 require (
 	github.com/99designs/gqlgen v0.17.43
