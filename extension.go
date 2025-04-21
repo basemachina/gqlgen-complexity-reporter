@@ -61,7 +61,7 @@ func (c extension) InterceptOperation(ctx context.Context, next graphql.Operatio
 	}
 
 	op := rc.Doc.Operations.ForName(rc.OperationName)
-	complexityCalcs := complexity.Calculate(c.es, op, rc.Variables)
+	complexityCalcs := complexity.Calculate(ctx, c.es, op, rc.Variables)
 
 	if complexityCalcs > c.threshold {
 		c.complexityReporter.ReportComplexity(ctx, rc.OperationName, complexityCalcs)
